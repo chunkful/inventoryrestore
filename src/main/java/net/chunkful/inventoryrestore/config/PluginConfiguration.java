@@ -2,6 +2,7 @@ package net.chunkful.inventoryrestore.config;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
+import java.time.Duration;
 import java.util.Locale;
 import java.util.Set;
 
@@ -12,6 +13,7 @@ public class PluginConfiguration {
     private String connectionString = "mongodb://localhost:27017/";
     private String databaseName = "inventoryrestore";
     private Set<Locale> locales = Set.of(Locale.US);
+    private Duration scheduledRecordingInterval = Duration.ofMinutes(5);
 
     public PluginConfiguration() {}
 
@@ -29,5 +31,9 @@ public class PluginConfiguration {
 
     public Set<Locale> locales() {
         return locales;
+    }
+
+    public Duration scheduledRecordingInterval() {
+        return scheduledRecordingInterval;
     }
 }

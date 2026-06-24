@@ -10,6 +10,7 @@ import org.spongepowered.configurate.loader.ConfigurationLoader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Locale;
 
 public class ConfigurationManager {
@@ -25,6 +26,7 @@ public class ConfigurationManager {
                                 .implicitInitialization(false)
                                 .serializers(builder ->
                                         builder.register(Locale.class, new LocaleSerializer())
+                                                .register(Duration.class, new DurationSerializer())
                                 )
                 )
                 .path(path)
@@ -32,7 +34,7 @@ public class ConfigurationManager {
     }
 
     public <T> T load(Class<T> clazz, Path path, T defaultConfig) {
-        if(!Files.exists(path)) {
+        if (!Files.exists(path)) {
             try {
                 Files.createDirectories(path.getParent());
             } catch (IOException e) {
