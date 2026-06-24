@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface SnapshotExporter {
 
-    List<ItemStack> export(Snapshot snapshot, boolean skipInventory, boolean skipEnderchest);
+    List<ItemStack> exportSnapshot(Snapshot snapshot, boolean skipInventory, boolean skipEnderchest);
 
 }

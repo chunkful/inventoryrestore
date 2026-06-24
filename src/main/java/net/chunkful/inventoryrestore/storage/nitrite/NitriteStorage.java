@@ -38,9 +38,13 @@ public class NitriteStorage implements Storage, Lifecycled {
     }
 
     @Override
-    public CompletableFuture<List<Snapshot>> getRecentSnapshotsOfPlayer(UUID playerUniqueId) {
+    public CompletableFuture<List<Snapshot>> getRecentSnapshotsOfPlayer(UUID playerUniqueId, int offset, int limit) {
         List<Snapshot> snapshots = nitrite.getRepository(snapshotDecorator)
                 .find(FluentFilter.where("playerUniqueId").eq(playerUniqueId))
+                .toList()
+                .stream()
+                .skip(offset)
+                .limit(limit)
                 .toList();
         return CompletableFuture.completedFuture(snapshots);
     }

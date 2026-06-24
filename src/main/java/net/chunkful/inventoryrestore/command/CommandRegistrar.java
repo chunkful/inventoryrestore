@@ -12,12 +12,10 @@ import org.incendo.cloud.parser.ParserDescriptor;
 
 public class CommandRegistrar {
 
-    private final Plugin owningPlugin;
     private final PaperCommandManager<Source> commandManager;
     private final PluginLifecycler pluginLifecycler;
 
     public CommandRegistrar(Plugin owningPlugin, PluginLifecycler pluginLifecycler) {
-        this.owningPlugin = owningPlugin;
         this.commandManager = PaperCommandManager.builder(PaperSimpleSenderMapper.simpleSenderMapper())
                 .executionCoordinator(ExecutionCoordinator.asyncCoordinator())
                 .buildOnEnable(owningPlugin);
@@ -29,7 +27,7 @@ public class CommandRegistrar {
 
         ParserDescriptor<Source, Snapshot> snapshotParserDescriptor = ParserDescriptor.parserDescriptor(new SnapshotParser(pluginLifecycler), Snapshot.class);
         commandManager.parserRegistry().registerParser(snapshotParserDescriptor);
-        commandManager.command(new Commands(owningPlugin, pluginLifecycler, snapshotParserDescriptor));
+        commandManager.command(new Commands(pluginLifecycler, snapshotParserDescriptor));
     }
 
 }

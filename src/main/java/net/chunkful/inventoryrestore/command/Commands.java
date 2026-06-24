@@ -1,5 +1,6 @@
 package net.chunkful.inventoryrestore.command;
 
+import net.chunkful.inventoryrestore.service.SortOrder;
 import net.kyori.adventure.text.Component;
 import net.chunkful.inventoryrestore.lifecycle.PluginLifecycler;
 import net.chunkful.inventoryrestore.model.Snapshot;
@@ -24,12 +25,10 @@ import java.util.function.Consumer;
 
 public class Commands implements CommandFactory<Source> {
 
-    private final Plugin owningPlugin;
     private final PluginLifecycler pluginLifecycler;
     private final ParserDescriptor<Source, Snapshot> snapshotParser;
 
-    public Commands(Plugin owningPlugin, PluginLifecycler pluginLifecycler, ParserDescriptor<Source, Snapshot> parserDescriptor) {
-        this.owningPlugin = owningPlugin;
+    public Commands(PluginLifecycler pluginLifecycler, ParserDescriptor<Source, Snapshot> parserDescriptor) {
         this.pluginLifecycler = pluginLifecycler;
         this.snapshotParser = parserDescriptor;
     }
@@ -60,11 +59,7 @@ public class Commands implements CommandFactory<Source> {
                 .required("target", OfflinePlayerParser.offlinePlayerParser())
                 .handler((ctx) -> {
                     OfflinePlayer target = ctx.get("target");
-                    List<Snapshot> snapshots = pluginLifecycler.bindings().storage().getRecentSnapshotsOfPlayer(target.getUniqueId()).join();
-
-                    snapshots.forEach(snapshot -> {
-                        ctx.sender().source().sendMessage(pluginLifecycler.bindings().formatter().formatList(snapshot));
-                    });
+                    pluginLifecycler.bindings().service().showSnapshotList(ctx.sender().source(), target.getUniqueId(), null, SortOrder.DESCENDING, 0, 20);
                 })
                 .build();
     }
@@ -73,11 +68,11 @@ public class Commands implements CommandFactory<Source> {
         return rootCommand.literal("save")
                 .permission("inventoryrestore.save")
                 .required("target", OfflinePlayerParser.offlinePlayerParser())
-                .handler(sync((ctx) -> {
+                .handler((ctx) -> {
                     OfflinePlayer target = ctx.get("target");
-                    pluginLifecycler.bindings().recordingService().recordAndSave(target.getUniqueId(), Snapshot.Cause.MANUAL);
+                    pluginLifecycler.bindings().service().recordAndSave(target.getUniqueId(), Snapshot.Cause.MANUAL);
                     ctx.sender().source().sendMessage(Component.translatable("ir.saved"));
-                }))
+                })
                 .build();
     }
 
@@ -87,7 +82,7 @@ public class Commands implements CommandFactory<Source> {
                 .required("snapshot", snapshotParser)
                 .handler((ctx) -> {
                     Snapshot snapshot = ctx.get("snapshot");
-                    ctx.sender().source().sendMessage(pluginLifecycler.bindings().formatter().formatDetails(snapshot));
+                    pluginLifecycler.bindings().service().showSnapshotDetails(ctx.sender().source(), snapshot);
                 })
                 .build();
     }
@@ -98,13 +93,13 @@ public class Commands implements CommandFactory<Source> {
                 .required("snapshot", snapshotParser)
                 .flag(CommandFlag.<Source>builder("target").withComponent(OfflinePlayerParser.offlinePlayerParser()).build())
                 .flag(CommandFlag.builder("no-teleport").build())
-                .handler(sync((ctx) -> {
+                .handler((ctx) -> {
                     Snapshot snapshot = ctx.get("snapshot");
                     UUID target = ctx.flags().<OfflinePlayer>getValue("target").map(OfflinePlayer::getUniqueId).orElse(snapshot.playerUniqueId());
                     boolean noTeleport = ctx.flags().hasFlag("no-teleport");
-                    pluginLifecycler.bindings().snapshotRestorer().restoreSnapshot(target, snapshot, !noTeleport);
+                    pluginLifecycler.bindings().service().restoreSnapshot(ctx.sender().source(), snapshot, target, !noTeleport);
                     ctx.sender().source().sendMessage(Component.translatable("ir.restored"));
-                }))
+                })
                 .build();
     }
 
@@ -115,13 +110,13 @@ public class Commands implements CommandFactory<Source> {
                 .required("snapshot", snapshotParser)
                 .flag(CommandFlag.builder("skip-inventory").build())
                 .flag(CommandFlag.builder("skip-enderchest").build())
-                .handler(sync(ctx -> {
+                .handler(ctx -> {
                     Snapshot snapshot = ctx.get("snapshot");
                     boolean skipInventory = ctx.flags().hasFlag("skip-inventory");
                     boolean skipEnderchest = ctx.flags().hasFlag("skip-enderchest");
-                    pluginLifecycler.bindings().snapshotExporter().export(snapshot, skipInventory, skipEnderchest);
+                    pluginLifecycler.bindings().service().exportSnapshot(ctx.sender().source(), snapshot, skipInventory, skipEnderchest);
                     ctx.sender().source().sendMessage(Component.translatable("ir.exported"));
-                }))
+                })
                 .build();
     }
 
@@ -130,14 +125,10 @@ public class Commands implements CommandFactory<Source> {
                 .senderType(PlayerSource.class)
                 .permission("inventoryrestore.open")
                 .required("snapshot", snapshotParser)
-                .handler(sync((ctx) -> {
+                .handler(ctx -> {
                     Snapshot snapshot = ctx.get("snapshot");
-                    pluginLifecycler.bindings().snapshotViewer().openInventory(ctx.sender().source(), snapshot);
-                }))
+                    pluginLifecycler.bindings().service().openSnapshot(ctx.sender().source(), snapshot);
+                })
                 .build();
-    }
-
-    private <C extends Source>CommandExecutionHandler<C> sync(Consumer<CommandContext<C>> context) {
-        return commandContext -> Bukkit.getScheduler().runTask(owningPlugin, () -> context.accept(commandContext));
     }
 }

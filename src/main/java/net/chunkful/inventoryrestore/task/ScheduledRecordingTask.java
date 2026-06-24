@@ -2,7 +2,7 @@ package net.chunkful.inventoryrestore.task;
 
 import net.chunkful.inventoryrestore.config.PluginConfiguration;
 import net.chunkful.inventoryrestore.model.Snapshot;
-import net.chunkful.inventoryrestore.service.RecordingService;
+import net.chunkful.inventoryrestore.service.Service;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -14,19 +14,19 @@ import java.util.WeakHashMap;
 public class ScheduledRecordingTask implements Runnable {
 
     private final PluginConfiguration pluginConfiguration;
-    private final RecordingService recordingService;
+    private final Service service;
     private final Map<Player, Instant> lastRecorded = new WeakHashMap<>();
 
-    public ScheduledRecordingTask(PluginConfiguration pluginConfiguration, RecordingService recordingService) {
+    public ScheduledRecordingTask(PluginConfiguration pluginConfiguration, Service service) {
         this.pluginConfiguration = pluginConfiguration;
-        this.recordingService = recordingService;
+        this.service = service;
     }
 
     @Override
     public void run() {
         Bukkit.getOnlinePlayers().forEach(player -> {
             if(shouldRecord(player)) {
-                recordingService.recordAndSave(player, Snapshot.Cause.SCHEDULE);
+                service.recordAndSave(player.getUniqueId(), Snapshot.Cause.SCHEDULE);
                 this.lastRecorded.put(player, Instant.now());
             }
         });

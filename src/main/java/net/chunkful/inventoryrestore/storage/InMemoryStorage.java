@@ -25,10 +25,12 @@ public class InMemoryStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<List<Snapshot>> getRecentSnapshotsOfPlayer(UUID playerUniqueId) {
+    public CompletableFuture<List<Snapshot>> getRecentSnapshotsOfPlayer(UUID playerUniqueId, int offset, int limit) {
         return CompletableFuture.completedFuture(
                 snapshots.stream()
                         .filter(snapshot -> snapshot.playerUniqueId().equals(playerUniqueId))
+                        .skip(offset)
+                        .limit(limit)
                         .toList()
         );
     }

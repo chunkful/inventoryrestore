@@ -13,7 +13,8 @@ import net.chunkful.inventoryrestore.restore.HybridRestorer;
 import net.chunkful.inventoryrestore.restore.NBTSnapshotRestorer;
 import net.chunkful.inventoryrestore.restore.OnlineSnapshotRestorer;
 import net.chunkful.inventoryrestore.restore.SnapshotRestorer;
-import net.chunkful.inventoryrestore.service.RecordingService;
+import net.chunkful.inventoryrestore.service.PaperService;
+import net.chunkful.inventoryrestore.service.Service;
 import net.chunkful.inventoryrestore.storage.AsyncStorage;
 import net.chunkful.inventoryrestore.viewer.InventorySnapshotViewer;
 import net.chunkful.inventoryrestore.viewer.SnapshotViewer;
@@ -29,9 +30,11 @@ public class PluginBinder {
         SnapshotRestorer snapshotRestorer = createSnapshotRestorer();
         SnapshotViewer snapshotViewer = new InventorySnapshotViewer(owningPlugin);
         SnapshotExporter snapshotExporter = new StandardContainerSnapshotExporter(Material.CHEST, 27);
-        RecordingService recordingService = new RecordingService(snapshotRecorder, storage);
         MessageLoader messageLoader = new MessageLoader(owningPlugin, pluginConfiguration.locales());
         Formatter formatter = new Formatter();
+        Service service = new PaperService(
+                owningPlugin, formatter, snapshotRecorder, snapshotRestorer, snapshotExporter, snapshotViewer, storage
+        );
 
         return new PluginBindings(
                 storage,
@@ -39,9 +42,9 @@ public class PluginBinder {
                 snapshotRestorer,
                 snapshotViewer,
                 snapshotExporter,
-                recordingService,
                 messageLoader,
-                formatter
+                formatter,
+                service
         );
     }
 

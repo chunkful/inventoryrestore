@@ -20,7 +20,7 @@ abstract class AbstractContainerSnapshotExporter implements SnapshotExporter {
     }
 
     @Override
-    public List<ItemStack> export(Snapshot snapshot, boolean skipInventory, boolean skipEnderchest) {
+    public List<ItemStack> exportSnapshot(Snapshot snapshot, boolean skipInventory, boolean skipEnderchest) {
         if(skipInventory && skipEnderchest) {
             return Collections.emptyList();
         }

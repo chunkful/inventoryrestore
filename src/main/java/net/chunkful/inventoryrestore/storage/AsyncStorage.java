@@ -34,8 +34,8 @@ public class AsyncStorage implements Storage, Lifecycled {
     }
 
     @Override
-    public CompletableFuture<List<Snapshot>> getRecentSnapshotsOfPlayer(UUID playerUniqueId) {
-        return CompletableFuture.supplyAsync(() -> delegate.getRecentSnapshotsOfPlayer(playerUniqueId), async())
+    public CompletableFuture<List<Snapshot>> getRecentSnapshotsOfPlayer(UUID playerUniqueId, int offset, int limit) {
+        return CompletableFuture.supplyAsync(() -> delegate.getRecentSnapshotsOfPlayer(playerUniqueId, offset, limit), async())
                 .thenCompose(Function.identity());
     }
 

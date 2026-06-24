@@ -13,6 +13,6 @@ public interface Storage {
 
     CompletableFuture<Optional<Snapshot>> getSnapshotById(UUID snapshotId);
 
-    CompletableFuture<List<Snapshot>> getRecentSnapshotsOfPlayer(UUID playerUniqueId);
+    CompletableFuture<List<Snapshot>> getRecentSnapshotsOfPlayer(UUID playerUniqueId, int offset, int limit);
 
 }

@@ -1,7 +1,6 @@
 package net.chunkful.inventoryrestore.lifecycle;
 
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
-import io.papermc.paper.util.Tick;
 import net.chunkful.inventoryrestore.config.ConfigurationManager;
 import net.chunkful.inventoryrestore.config.PluginConfiguration;
 import net.chunkful.inventoryrestore.listener.PlayerListener;
@@ -10,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +39,8 @@ public class PluginLifecycler {
         PluginConfiguration pluginConfiguration = loadPluginConfiguration();
         bindings = pluginBinder.bind(owningPlugin, pluginConfiguration);
         bindingObjects().forEach(object -> runIfLifecycle(object, Lifecycled::load));
-        registerListener(new PlayerListener(bindings.recordingService()));
-        registerTask(new ScheduledRecordingTask(pluginConfiguration, bindings.recordingService()));
+        registerListener(new PlayerListener(bindings.service()));
+        registerTask(new ScheduledRecordingTask(pluginConfiguration, bindings.service()));
     }
 
     public void unload() {
@@ -92,7 +90,7 @@ public class PluginLifecycler {
                 bindings.snapshotRestorer(),
                 bindings.snapshotViewer(),
                 bindings.snapshotExporter(),
-                bindings.recordingService(),
+                bindings.service(),
                 bindings.messageLoader()
         );
     }

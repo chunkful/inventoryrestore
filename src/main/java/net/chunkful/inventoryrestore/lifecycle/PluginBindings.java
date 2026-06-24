@@ -5,7 +5,7 @@ import net.chunkful.inventoryrestore.format.Formatter;
 import net.chunkful.inventoryrestore.format.MessageLoader;
 import net.chunkful.inventoryrestore.recording.SnapshotRecorder;
 import net.chunkful.inventoryrestore.restore.SnapshotRestorer;
-import net.chunkful.inventoryrestore.service.RecordingService;
+import net.chunkful.inventoryrestore.service.Service;
 import net.chunkful.inventoryrestore.storage.Storage;
 import net.chunkful.inventoryrestore.viewer.SnapshotViewer;
 
@@ -15,9 +15,9 @@ public record PluginBindings(
         SnapshotRestorer snapshotRestorer,
         SnapshotViewer snapshotViewer,
         SnapshotExporter snapshotExporter,
-        RecordingService recordingService,
         MessageLoader messageLoader,
-        Formatter formatter
+        Formatter formatter,
+        Service service
 ) {
 
 }

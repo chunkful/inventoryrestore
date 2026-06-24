@@ -47,8 +47,11 @@ public class MongoDbStorage implements Storage, Lifecycled {
     }
 
     @Override
-    public CompletableFuture<List<Snapshot>> getRecentSnapshotsOfPlayer(UUID playerUniqueId) {
-        ArrayList<Snapshot> snapshots = collection.find(Filters.eq("playerUniqueId", playerUniqueId)).into(new ArrayList<>());
+    public CompletableFuture<List<Snapshot>> getRecentSnapshotsOfPlayer(UUID playerUniqueId, int offset, int limit) {
+        ArrayList<Snapshot> snapshots = collection.find(Filters.eq("playerUniqueId", playerUniqueId))
+                .skip(offset)
+                .limit(limit)
+                .into(new ArrayList<>());
         return CompletableFuture.completedFuture(snapshots);
     }
 
