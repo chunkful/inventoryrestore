@@ -1,10 +1,15 @@
 package net.chunkful.inventoryrestore.format;
 
+import com.google.common.collect.Lists;
+import net.chunkful.inventoryrestore.service.SortOrder;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.translation.Argument;
 import net.kyori.adventure.text.object.ObjectContents;
 import net.chunkful.inventoryrestore.model.Snapshot;
@@ -15,13 +20,41 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
+import java.util.List;
 import java.util.UUID;
 
-public class Formatter {
+public class Format {
 
-    public Component formatList(Snapshot snapshot) {
+    public Component formatList(
+            List<Snapshot> snapshotPage,
+            int pageNumber,
+            UUID playerUniqueId,
+            Snapshot.Cause cause,
+            SortOrder sortOrder
+    ) {
+        return Component.empty()
+                .append(
+                        Component.translatable(
+                                "ir.list.header",
+                                Argument.component("player", formatPlayer(playerUniqueId)),
+                                Argument.numeric("page", pageNumber)
+                        )
+                ).appendNewline()
+                .append(
+                        snapshotPage.isEmpty() ?
+                                Component.translatable("ir.list.empty") :
+                                Component.join(JoinConfiguration.newlines(), Lists.transform(snapshotPage, this::formatEntry))
+                ).appendNewline()
+                .append(
+                        Component.translatable(
+                                "ir.list.footer",
+                                Argument.component("button_previous", formatPreviousPageButton(playerUniqueId, cause, sortOrder, pageNumber - 1)),
+                                Argument.component("button_next", formatNextPageButton(playerUniqueId, cause, sortOrder, pageNumber + 1))
+                        )
+                );
+    }
+
+    private Component formatEntry(Snapshot snapshot) {
         return Component.translatable("ir.list.entry")
                 .arguments(
                         Argument.component("cause", formatCause(snapshot.cause())),
@@ -50,18 +83,15 @@ public class Formatter {
 
     private Component formatTimestamp(Instant createdAt) {
         ZonedDateTime zonedDateTime = createdAt.atZone(ZoneId.systemDefault());
-        String format = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).format(zonedDateTime);
 
         Duration duration = Duration.between(createdAt, Instant.now());
         String formattedDuration = DurationFormatUtils.formatDuration(duration.toMillis(), "dd:HH:mm:ss", true);
 
-        return Component.text(format)
-                .hoverEvent(Component.text()
-                        .append(Component.text(formattedDuration))
-                        .append(Component.text(" ago"))
-                        .build()
-                )
-                .clickEvent(ClickEvent.copyToClipboard(format));
+        return Component.translatable(
+                "ir.timestamp",
+                        Argument.tagResolver(Formatter.date("date", zonedDateTime)),
+                        Argument.string("duration", formattedDuration)
+                );
     }
 
     private Component formatCause(Snapshot.Cause cause) {
@@ -107,6 +137,46 @@ public class Formatter {
         return Component.text("Open", NamedTextColor.GRAY, TextDecoration.UNDERLINED)
                 .hoverEvent(HoverEvent.showText(Component.text("Click to open")))
                 .clickEvent(ClickEvent.runCommand("inventoryrestore open " + snapshotId.toString()));
+    }
+
+    private Component formatPreviousPageButton(
+            UUID playerUniqueId,
+            Snapshot.Cause cause,
+            SortOrder sortOrder,
+            int pageNumber
+    ) {
+        return formatPageButton(Component.translatable("ir.previous_page"), playerUniqueId, cause, sortOrder, pageNumber);
+    }
+
+    private Component formatNextPageButton(
+            UUID playerUniqueId,
+            Snapshot.Cause cause,
+            SortOrder sortOrder,
+            int pageNumber
+    ) {
+        return formatPageButton(Component.translatable("ir.next_page"), playerUniqueId, cause, sortOrder, pageNumber);
+    }
+
+    private Component formatPageButton(
+            TranslatableComponent component,
+            UUID playerUniqueId,
+            Snapshot.Cause cause,
+            SortOrder sortOrder,
+            int pageNumber
+    ) {
+        StringBuilder commandBuilder = new StringBuilder();
+        commandBuilder.append("inventoryrestore list ")
+                .append(playerUniqueId.toString())
+                .append(" ")
+                .append(pageNumber)
+                .append(" ")
+                .append("--sort")
+                .append(" ")
+                .append(sortOrder.name());
+        if(cause != null)
+            commandBuilder.append(" ").append(cause.name().toLowerCase());
+
+        return component.clickEvent(ClickEvent.runCommand(commandBuilder.toString()));
     }
 
 }

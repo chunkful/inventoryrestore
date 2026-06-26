@@ -36,6 +36,7 @@ paperPluginYaml {
     main = "net.chunkful.inventoryrestore.InventoryrestorePlugin"
     loader = "xyz.jpenilla.gremlin.runtime.platformsupport.DefaultsPaperPluginLoader"
     apiVersion = "1.21.11"
+    foliaSupported = true
 
     authors.addAll("MCMDEV")
 
@@ -51,6 +52,12 @@ paperPluginYaml {
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(25)
+}
+
+runPaper {
+    folia {
+        registerTask()
+    }
 }
 
 tasks {

@@ -31,7 +31,7 @@ public class SnapshotParser implements ArgumentParser<Source, Snapshot> {
             return ArgumentParseResult.failure(e);
         }
 
-        Optional<Snapshot> optionalSnapshot = pluginLifecycler.bindings().storage().getSnapshotById(uuid).join();
+        Optional<Snapshot> optionalSnapshot = pluginLifecycler.bindings().storage().getSnapshotById(uuid);
 
         return optionalSnapshot.map(ArgumentParseResult::success).orElseGet(() -> ArgumentParseResult.failure(new IllegalArgumentException("Snapshot not found")));
 

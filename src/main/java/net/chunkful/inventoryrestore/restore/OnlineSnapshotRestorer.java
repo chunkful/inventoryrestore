@@ -24,7 +24,7 @@ public class OnlineSnapshotRestorer implements SnapshotRestorer {
         player.updateInventory();
 
         if(teleport) {
-            player.teleport(snapshot.location());
+            player.teleportAsync(snapshot.location());
         }
     }
 

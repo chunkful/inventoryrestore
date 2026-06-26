@@ -1,7 +1,7 @@
 package net.chunkful.inventoryrestore.lifecycle;
 
 import net.chunkful.inventoryrestore.export.SnapshotExporter;
-import net.chunkful.inventoryrestore.format.Formatter;
+import net.chunkful.inventoryrestore.format.Format;
 import net.chunkful.inventoryrestore.format.MessageLoader;
 import net.chunkful.inventoryrestore.recording.SnapshotRecorder;
 import net.chunkful.inventoryrestore.restore.SnapshotRestorer;
@@ -16,7 +16,7 @@ public record PluginBindings(
         SnapshotViewer snapshotViewer,
         SnapshotExporter snapshotExporter,
         MessageLoader messageLoader,
-        Formatter formatter,
+        Format format,
         Service service
 ) {
 

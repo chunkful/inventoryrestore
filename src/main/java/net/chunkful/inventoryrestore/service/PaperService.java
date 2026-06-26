@@ -1,7 +1,7 @@
 package net.chunkful.inventoryrestore.service;
 
 import net.chunkful.inventoryrestore.export.SnapshotExporter;
-import net.chunkful.inventoryrestore.format.Formatter;
+import net.chunkful.inventoryrestore.format.Format;
 import net.chunkful.inventoryrestore.model.Snapshot;
 import net.chunkful.inventoryrestore.recording.SnapshotRecorder;
 import net.chunkful.inventoryrestore.restore.SnapshotRestorer;
@@ -22,16 +22,16 @@ import java.util.function.Consumer;
 public class PaperService implements Service {
 
     private final Plugin owningPlugin;
-    private final Formatter formatter;
+    private final Format format;
     private final SnapshotRecorder snapshotRecorder;
     private final SnapshotRestorer snapshotRestorer;
     private final SnapshotExporter snapshotExporter;
     private final SnapshotViewer snapshotViewer;
     private final Storage storage;
 
-    public PaperService(Plugin owningPlugin, Formatter formatter, SnapshotRecorder snapshotRecorder, SnapshotRestorer snapshotRestorer, SnapshotExporter snapshotExporter, SnapshotViewer snapshotViewer, Storage storage) {
+    public PaperService(Plugin owningPlugin, Format format, SnapshotRecorder snapshotRecorder, SnapshotRestorer snapshotRestorer, SnapshotExporter snapshotExporter, SnapshotViewer snapshotViewer, Storage storage) {
         this.owningPlugin = owningPlugin;
-        this.formatter = formatter;
+        this.format = format;
         this.snapshotRecorder = snapshotRecorder;
         this.snapshotRestorer = snapshotRestorer;
         this.snapshotExporter = snapshotExporter;
@@ -41,40 +41,44 @@ public class PaperService implements Service {
 
     @Override
     public void recordAndSave(UUID playerUniqueId, Snapshot.Cause cause) {
-        CompletableFuture.supplyAsync(() -> snapshotRecorder.recordSnapshot(playerUniqueId, cause), sync())
-                .thenComposeAsync(storage::storeSnapshot, async());
+        CompletableFuture.supplyAsync(() -> snapshotRecorder.recordSnapshot(playerUniqueId, cause), sync()).thenAcceptAsync(storage::storeSnapshot, async());
     }
 
     @Override
-    public void showSnapshotList(CommandSender sender, UUID playerUniqueId, Snapshot.@Nullable Cause causeFilter, SortOrder sortOrder, int offset, int limit) {
-        if(!sender.hasPermission("inventoryrestore.list")) {
+    public void showSnapshotList(CommandSender sender, UUID playerUniqueId, Snapshot.@Nullable Cause causeFilter, SortOrder sortOrder, int page) {
+        if (!sender.hasPermission("inventoryrestore.list")) {
             sender.sendMessage(Component.translatable("ir.no_permission"));
             return;
         }
 
-        storage.getRecentSnapshotsOfPlayer(playerUniqueId, offset, limit)
-                .thenAcceptAsync(snapshots -> {
-                    for (Snapshot snapshot : snapshots) {
-                        sender.sendMessage(formatter.formatList(snapshot));
-                    }
-                }, sync());
+        int offset = (page - 1) * 10;
+        int limit = 10;
+        CompletableFuture.supplyAsync(() -> {
+            if (causeFilter != null) {
+                return storage.getRecentSnapshotsOfPlayer(playerUniqueId, offset, limit, sortOrder, causeFilter);
+            } else {
+                return storage.getRecentSnapshotsOfPlayer(playerUniqueId, offset, limit, sortOrder);
+            }
+        }, async()).thenAcceptAsync(snapshots -> {
+            sender.sendMessage(format.formatList(snapshots, page, playerUniqueId, causeFilter, sortOrder));
+        }, sync());
     }
 
     @Override
     public void showSnapshotDetails(CommandSender sender, Snapshot snapshot) {
-        if(!sender.hasPermission("inventoryrestore.details")) {
+        if (!sender.hasPermission("inventoryrestore.details")) {
             sender.sendMessage(Component.translatable("ir.no_permission"));
             return;
         }
 
         sync().execute(() -> {
-            sender.sendMessage(formatter.formatDetails(snapshot));
+            sender.sendMessage(format.formatDetails(snapshot));
         });
     }
 
     @Override
     public void showSnapshotDetails(CommandSender sender, UUID snapshotId) {
-        if(!sender.hasPermission("inventoryrestore.details")) {
+        if (!sender.hasPermission("inventoryrestore.details")) {
             sender.sendMessage(Component.translatable("ir.no_permission"));
             return;
         }
@@ -84,7 +88,7 @@ public class PaperService implements Service {
 
     @Override
     public void restoreSnapshot(CommandSender sender, Snapshot snapshot, UUID targetUniqueId, boolean teleport) {
-        if(!sender.hasPermission("inventoryrestore.restore")) {
+        if (!sender.hasPermission("inventoryrestore.restore")) {
             sender.sendMessage(Component.translatable("ir.no_permission"));
             return;
         }
@@ -96,7 +100,7 @@ public class PaperService implements Service {
 
     @Override
     public void restoreSnapshot(CommandSender sender, UUID snapshotId, UUID targetUniqueId, boolean teleport) {
-        if(!sender.hasPermission("inventoryrestore.restore")) {
+        if (!sender.hasPermission("inventoryrestore.restore")) {
             sender.sendMessage(Component.translatable("ir.no_permission"));
             return;
         }
@@ -106,7 +110,7 @@ public class PaperService implements Service {
 
     @Override
     public void openSnapshot(Player sender, Snapshot snapshot) {
-        if(!sender.hasPermission("inventoryrestore.open")) {
+        if (!sender.hasPermission("inventoryrestore.open")) {
             sender.sendMessage(Component.translatable("ir.no_permission"));
             return;
         }
@@ -118,7 +122,7 @@ public class PaperService implements Service {
 
     @Override
     public void openSnapshot(Player sender, UUID snapshotId) {
-        if(!sender.hasPermission("inventoryrestore.open")) {
+        if (!sender.hasPermission("inventoryrestore.open")) {
             sender.sendMessage(Component.translatable("ir.no_permission"));
             return;
         }
@@ -128,7 +132,7 @@ public class PaperService implements Service {
 
     @Override
     public void exportSnapshot(Player sender, Snapshot snapshot, boolean skipInventory, boolean skipEnderchest) {
-        if(!sender.hasPermission("inventoryrestore.export")) {
+        if (!sender.hasPermission("inventoryrestore.export")) {
             sender.sendMessage(Component.translatable("ir.no_permission"));
             return;
         }
@@ -140,7 +144,7 @@ public class PaperService implements Service {
 
     @Override
     public void exportSnapshot(Player sender, UUID snapshotId, boolean skipInventory, boolean skipEnderchest) {
-        if(!sender.hasPermission("inventoryrestore.export")) {
+        if (!sender.hasPermission("inventoryrestore.export")) {
             sender.sendMessage(Component.translatable("ir.no_permission"));
             return;
         }
@@ -149,11 +153,7 @@ public class PaperService implements Service {
     }
 
     private void withSnapshot(CommandSender sender, UUID snapshotId, Consumer<Snapshot> snapshotConsumer) {
-        storage.getSnapshotById(snapshotId)
-                .thenAcceptAsync(
-                        optionalSnapshot -> optionalSnapshot.ifPresentOrElse(snapshotConsumer,
-                                () -> sender.sendMessage(Component.translatable("ir.snapshot_not_found")))
-                );
+        CompletableFuture.supplyAsync(() -> storage.getSnapshotById(snapshotId), async()).thenAcceptAsync(optionalSnapshot -> optionalSnapshot.ifPresentOrElse(snapshotConsumer, () -> sender.sendMessage(Component.translatable("ir.snapshot_not_found"))));
     }
 
     private Executor sync() {

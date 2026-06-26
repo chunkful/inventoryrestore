@@ -1,6 +1,9 @@
 package net.chunkful.inventoryrestore.format;
 
+import net.chunkful.inventoryrestore.format.tags.CenterTag;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.translation.MiniMessageTranslationStore;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.chunkful.inventoryrestore.lifecycle.Lifecycled;
@@ -30,7 +33,7 @@ public class MessageLoader implements Lifecycled {
 
     @Override
     public void load() {
-        translator = MiniMessageTranslationStore.create(Key.key(owningPlugin, "messages"));
+        translator = MiniMessageTranslationStore.create(Key.key(owningPlugin, "messages"), miniMessage());
         translator.defaultLocale(Locale.US);
         for (Locale availableLocale : availableLocales) {
             try {
@@ -60,5 +63,11 @@ public class MessageLoader implements Lifecycled {
                 plugin.getDataFolder().toURI().toURL(),
                 plugin.getClass().getProtectionDomain().getCodeSource().getLocation(),
         });
+    }
+
+    private MiniMessage miniMessage() {
+        return MiniMessage.builder()
+                .editTags(builder -> builder.resolver(CenterTag.RESOLVER))
+                .build();
     }
 }

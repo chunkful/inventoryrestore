@@ -4,24 +4,20 @@ import net.chunkful.inventoryrestore.service.SortOrder;
 import net.kyori.adventure.text.Component;
 import net.chunkful.inventoryrestore.lifecycle.PluginLifecycler;
 import net.chunkful.inventoryrestore.model.Snapshot;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandFactory;
 import org.incendo.cloud.CommandManager;
-import org.incendo.cloud.bukkit.parser.OfflinePlayerParser;
-import org.incendo.cloud.context.CommandContext;
-import org.incendo.cloud.execution.CommandExecutionHandler;
 import org.incendo.cloud.paper.util.sender.PlayerSource;
 import org.incendo.cloud.paper.util.sender.Source;
 import org.incendo.cloud.parser.ParserDescriptor;
 import org.incendo.cloud.parser.flag.CommandFlag;
+import org.incendo.cloud.parser.standard.EnumParser;
+import org.incendo.cloud.parser.standard.IntegerParser;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 public class Commands implements CommandFactory<Source> {
 
@@ -38,7 +34,7 @@ public class Commands implements CommandFactory<Source> {
         Command.Builder<Source> rootCommand = commandManager.commandBuilder("inventoryrestore", "invrestore", "ir");
 
         return List.of(
-            reload(rootCommand), list(rootCommand), save(rootCommand), details(rootCommand), restore(rootCommand), export(rootCommand), open(rootCommand)
+            reload(rootCommand), list(rootCommand), save(rootCommand), details(rootCommand), restore(rootCommand), export(rootCommand), open(rootCommand), debug(rootCommand)
         );
     }
 
@@ -56,10 +52,16 @@ public class Commands implements CommandFactory<Source> {
     private Command<Source> list(Command.Builder<Source> rootCommand) {
         return rootCommand.literal("list")
                 .permission("inventoryrestore.list")
-                .required("target", OfflinePlayerParser.offlinePlayerParser())
+                .required("target", BetterOfflinePlayerParser.offlinePlayerParser())
+                .required("page", IntegerParser.integerParser(1))
+                .flag(CommandFlag.<Source>builder("cause").withComponent(EnumParser.enumParser(Snapshot.Cause.class)))
+                .flag(CommandFlag.<Source>builder("sort").withComponent(EnumParser.enumParser(SortOrder.class)))
                 .handler((ctx) -> {
                     OfflinePlayer target = ctx.get("target");
-                    pluginLifecycler.bindings().service().showSnapshotList(ctx.sender().source(), target.getUniqueId(), null, SortOrder.DESCENDING, 0, 20);
+                    int page = ctx.get("page");
+                    Snapshot.Cause cause = ctx.flags().get("cause");
+                    SortOrder sortOrder = ctx.flags().getValue("sort", SortOrder.DESCENDING);
+                    pluginLifecycler.bindings().service().showSnapshotList(ctx.sender().source(), target.getUniqueId(), cause, sortOrder, page);
                 })
                 .build();
     }
@@ -67,7 +69,7 @@ public class Commands implements CommandFactory<Source> {
     private Command<Source> save(Command.Builder<Source> rootCommand) {
         return rootCommand.literal("save")
                 .permission("inventoryrestore.save")
-                .required("target", OfflinePlayerParser.offlinePlayerParser())
+                .required("target", BetterOfflinePlayerParser.offlinePlayerParser())
                 .handler((ctx) -> {
                     OfflinePlayer target = ctx.get("target");
                     pluginLifecycler.bindings().service().recordAndSave(target.getUniqueId(), Snapshot.Cause.MANUAL);
@@ -91,7 +93,7 @@ public class Commands implements CommandFactory<Source> {
         return rootCommand.literal("restore")
                 .permission("inventoryrestore.restore")
                 .required("snapshot", snapshotParser)
-                .flag(CommandFlag.<Source>builder("target").withComponent(OfflinePlayerParser.offlinePlayerParser()).build())
+                .flag(CommandFlag.<Source>builder("target").withComponent(BetterOfflinePlayerParser.offlinePlayerParser()).build())
                 .flag(CommandFlag.builder("no-teleport").build())
                 .handler((ctx) -> {
                     Snapshot snapshot = ctx.get("snapshot");
@@ -128,6 +130,15 @@ public class Commands implements CommandFactory<Source> {
                 .handler(ctx -> {
                     Snapshot snapshot = ctx.get("snapshot");
                     pluginLifecycler.bindings().service().openSnapshot(ctx.sender().source(), snapshot);
+                })
+                .build();
+    }
+
+    private Command<Source> debug(Command.Builder<Source> rootCommand) {
+        return rootCommand.literal("debug")
+                .permission("inventoryrestore.debug")
+                .handler((ctx) -> {
+                    ctx.sender().source().sendMessage("*chirp* *chirp*");
                 })
                 .build();
     }

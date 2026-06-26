@@ -2,6 +2,7 @@ package net.chunkful.inventoryrestore.storage.nitrite;
 
 import net.chunkful.inventoryrestore.lifecycle.Lifecycled;
 import net.chunkful.inventoryrestore.model.Snapshot;
+import net.chunkful.inventoryrestore.service.SortOrder;
 import net.chunkful.inventoryrestore.storage.Storage;
 import org.bukkit.plugin.Plugin;
 import org.dizitart.no2.Nitrite;
@@ -12,7 +13,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class NitriteStorage implements Storage, Lifecycled {
 
@@ -26,27 +26,37 @@ public class NitriteStorage implements Storage, Lifecycled {
     }
 
     @Override
-    public CompletableFuture<Void> storeSnapshot(Snapshot snapshot) {
+    public void storeSnapshot(Snapshot snapshot) {
         nitrite.getRepository(snapshotDecorator).insert(snapshot);
-        return CompletableFuture.completedFuture(null);
     }
 
     @Override
-    public CompletableFuture<Optional<Snapshot>> getSnapshotById(UUID snapshotId) {
-        Optional<Snapshot> optionalSnapshot = Optional.ofNullable(nitrite.getRepository(snapshotDecorator).getById(snapshotId));
-        return CompletableFuture.completedFuture(optionalSnapshot);
+    public Optional<Snapshot> getSnapshotById(UUID snapshotId) {
+        return Optional.ofNullable(nitrite.getRepository(snapshotDecorator).getById(snapshotId));
     }
 
     @Override
-    public CompletableFuture<List<Snapshot>> getRecentSnapshotsOfPlayer(UUID playerUniqueId, int offset, int limit) {
-        List<Snapshot> snapshots = nitrite.getRepository(snapshotDecorator)
+    public List<Snapshot> getRecentSnapshotsOfPlayer(UUID playerUniqueId, int offset, int limit, SortOrder sortOrder) {
+        return nitrite.getRepository(snapshotDecorator)
                 .find(FluentFilter.where("playerUniqueId").eq(playerUniqueId))
                 .toList()
                 .stream()
                 .skip(offset)
                 .limit(limit)
+                .sorted(SortOrder.snapshotComparator(sortOrder))
                 .toList();
-        return CompletableFuture.completedFuture(snapshots);
+    }
+
+    @Override
+    public List<Snapshot> getRecentSnapshotsOfPlayer(UUID playerUniqueId, int offset, int limit, SortOrder sortOrder, Snapshot.Cause cause) {
+        return nitrite.getRepository(snapshotDecorator)
+                .find(FluentFilter.where("playerUniqueId").eq(playerUniqueId).and(FluentFilter.where("cause").eq(cause)))
+                .toList()
+                .stream()
+                .skip(offset)
+                .limit(limit)
+                .sorted(SortOrder.snapshotComparator(sortOrder))
+                .toList();
     }
 
     @Override

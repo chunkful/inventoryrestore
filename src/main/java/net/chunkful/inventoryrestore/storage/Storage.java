@@ -1,6 +1,7 @@
 package net.chunkful.inventoryrestore.storage;
 
 import net.chunkful.inventoryrestore.model.Snapshot;
+import net.chunkful.inventoryrestore.service.SortOrder;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,10 +10,12 @@ import java.util.concurrent.CompletableFuture;
 
 public interface Storage {
 
-    CompletableFuture<Void> storeSnapshot(Snapshot snapshot);
+    void storeSnapshot(Snapshot snapshot);
 
-    CompletableFuture<Optional<Snapshot>> getSnapshotById(UUID snapshotId);
+    Optional<Snapshot> getSnapshotById(UUID snapshotId);
 
-    CompletableFuture<List<Snapshot>> getRecentSnapshotsOfPlayer(UUID playerUniqueId, int offset, int limit);
+    List<Snapshot> getRecentSnapshotsOfPlayer(UUID playerUniqueId, int offset, int limit, SortOrder sortOrder);
+
+    List<Snapshot> getRecentSnapshotsOfPlayer(UUID playerUniqueId, int offset, int limit, SortOrder sortOrder, Snapshot.Cause cause);
 
 }

@@ -18,8 +18,7 @@ public interface Service {
             UUID playerUniqueId,
             Snapshot.@Nullable Cause causeFilter,
             SortOrder sortOrder,
-            int offset,
-            int limit
+            int page
     );
 
     void showSnapshotDetails(

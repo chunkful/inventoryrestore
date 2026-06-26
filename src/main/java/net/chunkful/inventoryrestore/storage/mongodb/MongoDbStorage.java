@@ -6,8 +6,10 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import net.chunkful.inventoryrestore.lifecycle.Lifecycled;
 import net.chunkful.inventoryrestore.model.Snapshot;
+import net.chunkful.inventoryrestore.service.SortOrder;
 import net.chunkful.inventoryrestore.storage.Storage;
 import org.bson.UuidRepresentation;
 import org.bson.codecs.configuration.CodecRegistries;
@@ -35,24 +37,36 @@ public class MongoDbStorage implements Storage, Lifecycled {
     }
 
     @Override
-    public CompletableFuture<Void> storeSnapshot(Snapshot snapshot) {
+    public void storeSnapshot(Snapshot snapshot) {
         collection.insertOne(snapshot);
-        return CompletableFuture.completedFuture(null);
     }
 
     @Override
-    public CompletableFuture<Optional<Snapshot>> getSnapshotById(UUID snapshotId) {
-        Optional<Snapshot> optionalSnapshot = Optional.ofNullable(collection.find(Filters.eq("_id", snapshotId), Snapshot.class).first());
-        return CompletableFuture.completedFuture(optionalSnapshot);
+    public Optional<Snapshot> getSnapshotById(UUID snapshotId) {
+        return Optional.ofNullable(collection.find(Filters.eq("_id", snapshotId), Snapshot.class).first());
     }
 
     @Override
-    public CompletableFuture<List<Snapshot>> getRecentSnapshotsOfPlayer(UUID playerUniqueId, int offset, int limit) {
-        ArrayList<Snapshot> snapshots = collection.find(Filters.eq("playerUniqueId", playerUniqueId))
+    public List<Snapshot> getRecentSnapshotsOfPlayer(UUID playerUniqueId, int offset, int limit, SortOrder sortOrder) {
+        return collection.find(Filters.eq("playerUniqueId", playerUniqueId))
                 .skip(offset)
                 .limit(limit)
+                .sort(sortOrder == SortOrder.ASCENDING ? Sorts.ascending("createdAt") : Sorts.descending("createdAt"))
                 .into(new ArrayList<>());
-        return CompletableFuture.completedFuture(snapshots);
+    }
+
+    @Override
+    public List<Snapshot> getRecentSnapshotsOfPlayer(UUID playerUniqueId, int offset, int limit, SortOrder sortOrder, Snapshot.Cause cause) {
+        return collection.find(
+                    Filters.and(
+                            Filters.eq("playerUniqueId", playerUniqueId),
+                            Filters.eq("cause", cause)
+                    )
+                )
+                .skip(offset)
+                .limit(limit)
+                .sort(sortOrder == SortOrder.ASCENDING ? Sorts.ascending("createdAt") : Sorts.descending("createdAt"))
+                .into(new ArrayList<>());
     }
 
     @Override
