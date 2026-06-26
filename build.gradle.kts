@@ -30,6 +30,7 @@ dependencies {
     runtimeDownload(libs.nitrite)
     runtimeDownload(libs.nitrite.mvstore)
     runtimeDownload(libs.mongodb)
+    runtimeDownload(libs.adventure.nbt)
 }
 
 paperPluginYaml {

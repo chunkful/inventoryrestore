@@ -14,6 +14,8 @@ public class PluginConfiguration {
     private String databaseName = "inventoryrestore";
     private Set<Locale> locales = Set.of(Locale.US);
     private Duration scheduledRecordingInterval = Duration.ofMinutes(5);
+    private ButtonMode buttonMode = ButtonMode.PAYLOAD;
+    private String buttonCommandRoot = "inventoryrestore";
 
     public PluginConfiguration() {}
 
@@ -35,5 +37,13 @@ public class PluginConfiguration {
 
     public Duration scheduledRecordingInterval() {
         return scheduledRecordingInterval;
+    }
+
+    public ButtonMode buttonMode() {
+        return buttonMode;
+    }
+
+    public String buttonCommandRoot() {
+        return buttonCommandRoot;
     }
 }

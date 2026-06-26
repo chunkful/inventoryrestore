@@ -35,6 +35,10 @@ public interface Service {
 
     void restoreSnapshot(CommandSender sender, UUID snapshotId, UUID targetUniqueId, boolean teleport);
 
+    void restoreSnapshot(CommandSender sender, Snapshot snapshot, boolean teleport);
+
+    void restoreSnapshot(CommandSender sender, UUID snapshotId, boolean teleport);
+
     void openSnapshot(Player sender, Snapshot snapshot);
 
     void openSnapshot(Player sender, UUID snapshotId);

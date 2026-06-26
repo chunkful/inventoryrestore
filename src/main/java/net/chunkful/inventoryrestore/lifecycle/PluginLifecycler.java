@@ -3,6 +3,7 @@ package net.chunkful.inventoryrestore.lifecycle;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.chunkful.inventoryrestore.config.ConfigurationManager;
 import net.chunkful.inventoryrestore.config.PluginConfiguration;
+import net.chunkful.inventoryrestore.listener.ClickListener;
 import net.chunkful.inventoryrestore.listener.PlayerListener;
 import net.chunkful.inventoryrestore.task.ScheduledRecordingTask;
 import org.bukkit.Bukkit;
@@ -40,6 +41,7 @@ public class PluginLifecycler {
         bindings = pluginBinder.bind(owningPlugin, pluginConfiguration);
         bindingObjects().forEach(object -> runIfLifecycle(object, Lifecycled::load));
         registerListener(new PlayerListener(bindings.service()));
+        registerListener(new ClickListener(bindings.service()));
         registerTask(new ScheduledRecordingTask(pluginConfiguration, bindings.service()));
     }
 

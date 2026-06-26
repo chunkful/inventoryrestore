@@ -36,7 +36,7 @@ public class PluginBinder {
         SnapshotViewer snapshotViewer = new InventorySnapshotViewer(owningPlugin);
         SnapshotExporter snapshotExporter = new StandardContainerSnapshotExporter(Material.CHEST, 27);
         MessageLoader messageLoader = new MessageLoader(owningPlugin, pluginConfiguration.locales());
-        Format format = new Format();
+        Format format = new Format(pluginConfiguration);
         Service service = createService(owningPlugin, format, snapshotRecorder, snapshotRestorer, snapshotExporter, snapshotViewer, storage);
 
         return new PluginBindings(

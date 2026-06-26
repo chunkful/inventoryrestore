@@ -1,6 +1,8 @@
 package net.chunkful.inventoryrestore.format;
 
 import com.google.common.collect.Lists;
+import net.chunkful.inventoryrestore.config.PluginConfiguration;
+import net.chunkful.inventoryrestore.format.button.*;
 import net.chunkful.inventoryrestore.service.SortOrder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -15,6 +17,8 @@ import net.kyori.adventure.text.object.ObjectContents;
 import net.chunkful.inventoryrestore.model.Snapshot;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.bukkit.Bukkit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -24,6 +28,13 @@ import java.util.List;
 import java.util.UUID;
 
 public class Format {
+
+    private static final Logger log = LoggerFactory.getLogger(Format.class);
+    private final PluginConfiguration pluginConfiguration;
+
+    public Format(PluginConfiguration pluginConfiguration) {
+        this.pluginConfiguration = pluginConfiguration;
+    }
 
     public Component formatList(
             List<Snapshot> snapshotPage,
@@ -116,27 +127,47 @@ public class Format {
     }
 
     private Component formatDetailsButton(UUID snapshotId) {
-        return Component.text("Details", NamedTextColor.GRAY, TextDecoration.UNDERLINED)
-                .hoverEvent(HoverEvent.showText(Component.text("Click to view details")))
-                .clickEvent(ClickEvent.runCommand("inventoryrestore details " + snapshotId.toString()));
+        try {
+            return Component.text("Details", NamedTextColor.GRAY, TextDecoration.UNDERLINED)
+                    .hoverEvent(HoverEvent.showText(Component.text("Click to view details")))
+                    .clickEvent(pluginConfiguration.buttonMode().create(new DetailsButton(snapshotId), pluginConfiguration));
+        } catch (Exception e) {
+            log.error("Failed to create details button for snapshot {}", snapshotId, e);
+            return Component.text("Error", NamedTextColor.RED);
+        }
     }
 
     private Component formatRestoreButton(UUID snapshotId) {
-        return Component.text("Restore", NamedTextColor.GRAY, TextDecoration.UNDERLINED)
-                .hoverEvent(HoverEvent.showText(Component.text("Click to restore")))
-                .clickEvent(ClickEvent.runCommand("inventoryrestore restore " + snapshotId.toString()));
+        try {
+            return Component.text("Restore", NamedTextColor.GRAY, TextDecoration.UNDERLINED)
+                    .hoverEvent(HoverEvent.showText(Component.text("Click to restore")))
+                    .clickEvent(pluginConfiguration.buttonMode().create(new RestoreButton(snapshotId, null, false), pluginConfiguration));
+        } catch (Exception e) {
+            log.error("Failed to create restore button for snapshot {}", snapshotId, e);
+            return Component.text("Error", NamedTextColor.RED);
+        }
     }
 
     private Component formatExportButton(UUID snapshotId) {
-        return Component.text("Export", NamedTextColor.GRAY, TextDecoration.UNDERLINED)
-                .hoverEvent(HoverEvent.showText(Component.text("Click to export")))
-                .clickEvent(ClickEvent.runCommand("inventoryrestore export " + snapshotId.toString()));
+        try {
+            return Component.text("Export", NamedTextColor.GRAY, TextDecoration.UNDERLINED)
+                    .hoverEvent(HoverEvent.showText(Component.text("Click to export")))
+                    .clickEvent(pluginConfiguration.buttonMode().create(new ExportButton(snapshotId, false, false), pluginConfiguration));
+        } catch (Exception e) {
+            log.error("Failed to create export button for snapshot {}", snapshotId, e);
+            return Component.text("Error", NamedTextColor.RED);
+        }
     }
 
     private Component formatOpenButton(UUID snapshotId) {
-        return Component.text("Open", NamedTextColor.GRAY, TextDecoration.UNDERLINED)
-                .hoverEvent(HoverEvent.showText(Component.text("Click to open")))
-                .clickEvent(ClickEvent.runCommand("inventoryrestore open " + snapshotId.toString()));
+        try {
+            return Component.text("Open", NamedTextColor.GRAY, TextDecoration.UNDERLINED)
+                    .hoverEvent(HoverEvent.showText(Component.text("Click to open")))
+                    .clickEvent(pluginConfiguration.buttonMode().create(new OpenButton(snapshotId), pluginConfiguration));
+        } catch (Exception e) {
+            log.error("Failed to create open button for snapshot {}", snapshotId, e);
+            return Component.text("Error", NamedTextColor.RED);
+        }
     }
 
     private Component formatPreviousPageButton(
@@ -164,19 +195,12 @@ public class Format {
             SortOrder sortOrder,
             int pageNumber
     ) {
-        StringBuilder commandBuilder = new StringBuilder();
-        commandBuilder.append("inventoryrestore list ")
-                .append(playerUniqueId.toString())
-                .append(" ")
-                .append(pageNumber)
-                .append(" ")
-                .append("--sort")
-                .append(" ")
-                .append(sortOrder.name());
-        if(cause != null)
-            commandBuilder.append(" ").append(cause.name().toLowerCase());
-
-        return component.clickEvent(ClickEvent.runCommand(commandBuilder.toString()));
+        try {
+            return component.clickEvent(pluginConfiguration.buttonMode().create(new ListButton(playerUniqueId, cause, pageNumber, sortOrder), pluginConfiguration));
+        } catch (Exception e) {
+            log.error("Failed to create page button for player {} with cause {} and page number {}", playerUniqueId, cause, pageNumber, e);
+            return Component.text("Error", NamedTextColor.RED);
+        }
     }
 
 }

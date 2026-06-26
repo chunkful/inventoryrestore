@@ -1,4 +1,4 @@
-package net.chunkful.inventoryrestore.format.tags;
+package net.chunkful.inventoryrestore.format.tag;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;

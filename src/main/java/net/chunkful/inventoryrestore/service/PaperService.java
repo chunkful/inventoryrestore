@@ -109,6 +109,16 @@ public class PaperService implements Service {
     }
 
     @Override
+    public void restoreSnapshot(CommandSender sender, Snapshot snapshot, boolean teleport) {
+        snapshotRestorer.restoreSnapshot(snapshot.playerUniqueId(), snapshot, teleport);
+    }
+
+    @Override
+    public void restoreSnapshot(CommandSender sender, UUID snapshotId, boolean teleport) {
+        withSnapshot(sender, snapshotId, snapshot -> restoreSnapshot(sender, snapshot, teleport));
+    }
+
+    @Override
     public void openSnapshot(Player sender, Snapshot snapshot) {
         if (!sender.hasPermission("inventoryrestore.open")) {
             sender.sendMessage(Component.translatable("ir.no_permission"));

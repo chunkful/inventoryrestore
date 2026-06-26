@@ -1,9 +1,8 @@
 package net.chunkful.inventoryrestore.format;
 
-import net.chunkful.inventoryrestore.format.tags.CenterTag;
+import net.chunkful.inventoryrestore.format.tag.CenterTag;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.translation.MiniMessageTranslationStore;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.chunkful.inventoryrestore.lifecycle.Lifecycled;

@@ -3,6 +3,7 @@ paper-api = "1.21.11-R0.1-SNAPSHOT"
 minecraft = "1.21.11"
 cloud = "2.0.0"
 cloud-paper = "2.0.0-beta.10"
+adventure = "4.26.1"
 configurate = "4.2.0"
 nbtapi = "2.15.7"
 nitrite = "4.3.2"
@@ -24,6 +25,7 @@ cloud = { module = "org.incendo:cloud-core", version.ref = "cloud" }
 cloud-annotations = { module = "org.incendo:cloud-annotations", version.ref = "cloud" }
 cloud-paper = { module = "org.incendo:cloud-paper", version.ref = "cloud-paper" }
 cloud-minecraft-extras = { module = "org.incendo:cloud-minecraft-extras", version.ref = "cloud-paper" }
+adventure-nbt = { module = "net.kyori:adventure-nbt", version.ref = "adventure" }
 
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
