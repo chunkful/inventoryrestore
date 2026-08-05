@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.run.paper)
     alias(libs.plugins.resource.factory.paper)
     alias(libs.plugins.gremlin.gradle)
+    alias(libs.plugins.minotaur)
 }
 
 repositories {
@@ -75,4 +76,31 @@ tasks {
         // Preserve parameter names in the bytecode
         options.compilerArgs.add("-parameters")
     }
+}
+
+modrinth {
+    token = System.getenv("MODRINTH_TOKEN")
+    debugMode = System.getenv("CI") != "true"
+    projectId = "chunkful-inventoryrestore"
+    versionType = "release"
+    uploadFile.set(tasks.shadowJar)
+    gameVersions = listOf("1.21.11", "26.1.2", "26.2")
+    loaders = listOf("paper", "folia")
+    dependencies {
+        required.project("nbtapi")
+    }
+    syncBodyFrom = file("README.md").readText()
+
+    val tagMessage: String? = System.getenv("CI_COMMIT_TAG_MESSAGE")
+    tagMessage?.let {
+        changelog.set(it)
+    }
+}
+
+tasks.modrinth {
+    dependsOn(tasks.modrinthSyncBody)
+}
+
+tasks.register("publish") {
+    dependsOn(tasks.build, tasks.modrinth)
 }
