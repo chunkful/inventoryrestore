@@ -68,7 +68,7 @@ tasks {
 
     runServer {
         minecraftVersion(libs.versions.minecraft.get())
-        jvmArgs("-Xms2G", "-Xmx2G", "-Dcom.mojang.eula.agree=true", "-XX:+AllowEnhancedClassRedefinition")
+        jvmArgs("-Xms2G", "-Xmx2G", "-Dcom.mojang.eula.agree=true")
     }
 
     withType<JavaCompile> {
