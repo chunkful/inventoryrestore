@@ -1,5 +1,5 @@
 ![](https://raw.githubusercontent.com/chunkful/inventoryrestore/main/assets/banner.png "Banner")
-# Vanish
+# Inventory Restore
 
 A well-made inventory restoration plugin for modern Paper servers.
 
