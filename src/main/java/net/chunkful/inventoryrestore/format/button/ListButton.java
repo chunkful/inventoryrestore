@@ -36,6 +36,7 @@ public final class ListButton implements Button<ListButton> {
 
     @Override
     public void execute(Player player, Service service) {
+        if(!player.hasPermission("inventoryrestore.list")) return;
         service.showSnapshotList(player, playerUniqueId, causeFilter, sortOrder, page);
     }
 

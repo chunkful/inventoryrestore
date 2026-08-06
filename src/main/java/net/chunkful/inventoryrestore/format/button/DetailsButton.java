@@ -27,6 +27,7 @@ public final class DetailsButton implements Button<DetailsButton> {
 
     @Override
     public void execute(Player player, Service service) {
+        if(!player.hasPermission("inventoryrestore.details")) return;
         service.showSnapshotDetails(player, snapshotId);
     }
 }

@@ -32,6 +32,7 @@ public final class RestoreButton implements Button<RestoreButton> {
 
     @Override
     public void execute(Player player, Service service) {
+        if(!player.hasPermission("inventoryrestore.restore")) return;
         service.restoreSnapshot(player, snapshotId, !skipTeleport);
     }
 
