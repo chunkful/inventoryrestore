@@ -167,7 +167,13 @@ public class PaperService implements Service {
     }
 
     private Executor sync() {
-        return command -> Bukkit.getScheduler().runTask(owningPlugin, command);
+        return command -> {
+            if(Bukkit.isPrimaryThread()) {
+                command.run();
+            }   else    {
+                Bukkit.getScheduler().runTask(owningPlugin, command);
+            }
+        };
     }
 
     private Executor async() {
