@@ -32,6 +32,7 @@ public final class ExportButton implements Button<ExportButton> {
 
     @Override
     public void execute(Player player, Service service) {
+        if(!player.hasPermission("inventoryrestore.export")) return;
         service.exportSnapshot(player, snapshotId, skipInventory, skipEnderchest);
     }
 
