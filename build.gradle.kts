@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.resource.factory.paper)
     alias(libs.plugins.gremlin.gradle)
     alias(libs.plugins.minotaur)
+    alias(libs.plugins.hangar)
 }
 
 repositories {
@@ -78,6 +79,8 @@ tasks {
     }
 }
 
+val gameVersions = listOf("1.21.11", "26.1.2", "26.2")
+
 modrinth {
     token = System.getenv("MODRINTH_TOKEN")
     debugMode = System.getenv("CI") != "true"
@@ -101,6 +104,41 @@ tasks.modrinth {
     dependsOn(tasks.modrinthSyncBody)
 }
 
+hangarPublish {
+    publications.register("plugin") {
+        version = project.version.toString()
+        id = "chunkful-inventoryrestore"
+        channel = "Release"
+
+        apiKey = System.getenv("HANGAR_TOKEN")
+
+        platforms {
+            paper {
+                jar = tasks.shadowJar.get().archiveFile
+                platformVersions = gameVersions
+                dependencies {
+                    hangar("NBTAPI")
+                }
+            }
+        }
+
+        pages {
+            resourcePage(provider {
+                file("README.md").readText()
+            })
+        }
+
+        val tagMessage: String? = System.getenv("CI_COMMIT_TAG_MESSAGE")
+        tagMessage?.let {
+            changelog.set(it)
+        }
+    }
+}
+
+tasks.named("publishPluginPublicationToHangar") {
+    dependsOn(tasks.named("syncPluginPublicationMainResourcePagePageToHangar"))
+}
+
 tasks.register("publish") {
-    dependsOn(tasks.build, tasks.modrinth)
+    dependsOn(tasks.build, tasks.modrinth, tasks.publishAllPublicationsToHangar)
 }
