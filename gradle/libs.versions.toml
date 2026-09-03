@@ -8,6 +8,12 @@ configurate = "4.2.0"
 nbtapi = "2.15.7"
 nitrite = "4.3.2"
 mongodb = "5.8.0"
+jooq = "3.21.7"
+flyway = "13.4.0"
+hikaricp = "7.0.2"
+postgresql = "42.7.13"
+h2 = "2.4.240"
+mariadb = "3.5.10"
 
 shadow = "9.4.2"
 run-task = "3.0.2"
@@ -28,6 +34,16 @@ cloud-annotations = { module = "org.incendo:cloud-annotations", version.ref = "c
 cloud-paper = { module = "org.incendo:cloud-paper", version.ref = "cloud-paper" }
 cloud-minecraft-extras = { module = "org.incendo:cloud-minecraft-extras", version.ref = "cloud-paper" }
 adventure-nbt = { module = "net.kyori:adventure-nbt", version.ref = "adventure" }
+jooq = { module = "org.jooq:jooq", version.ref = "jooq" }
+jooq-metaExtensions = { module = "org.jooq:jooq-meta-extensions", version.ref = "jooq" }
+jooq-jackson3Extensions = { module = "org.jooq:jooq-jackson3-extensions", version.ref = "jooq" }
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
+flyway-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
+flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
+hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+h2 = { module = "com.h2database:h2", version.ref = "h2" }
+mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version.ref = "mariadb" }
 
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
@@ -36,3 +52,4 @@ resource-factory-paper = { id = "xyz.jpenilla.resource-factory-paper-convention"
 gremlin-gradle = { id = "xyz.jpenilla.gremlin-gradle", version.ref = "gremlin" }
 minotaur = { id = "com.modrinth.minotaur", version.ref = "minotaur" }
 hangar = { id = "io.papermc.hangar-publish-plugin", version.ref = "hangar" }
+jooqCodegen = { id = "org.jooq.jooq-codegen-gradle", version.ref = "jooq" }
