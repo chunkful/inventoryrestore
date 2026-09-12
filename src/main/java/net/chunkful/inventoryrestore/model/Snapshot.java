@@ -1,9 +1,15 @@
 package net.chunkful.inventoryrestore.model;
 
+import net.chunkful.inventoryrestore.storage.sql.ItemStackArrayDeserializer;
+import net.chunkful.inventoryrestore.storage.sql.ItemStackArraySerializer;
+import net.chunkful.inventoryrestore.storage.sql.LocationDeserializingConverter;
+import net.chunkful.inventoryrestore.storage.sql.LocationSerializingConverter;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
 
 import java.time.Instant;
 import java.util.List;
@@ -15,13 +21,19 @@ public record Snapshot(
         Instant createdAt,
         UUID playerUniqueId,
         Cause cause,
+        @JsonSerialize(using = ItemStackArraySerializer.class)
+        @JsonDeserialize(using = ItemStackArrayDeserializer.class)
         ItemStack[] items,
+        @JsonSerialize(using = ItemStackArraySerializer.class)
+        @JsonDeserialize(using = ItemStackArrayDeserializer.class)
         ItemStack[] enderChest,
         int health,
         int level,
         int foodLevel,
         int experience,
         List<PotionEffect> activePotionEffects,
+        @JsonSerialize(converter = LocationSerializingConverter.class)
+        @JsonDeserialize(converter = LocationDeserializingConverter.class)
         Location location
 ) {
 

@@ -4,6 +4,7 @@ import net.chunkful.inventoryrestore.storage.InMemoryStorage;
 import net.chunkful.inventoryrestore.storage.mongodb.MongoDbStorage;
 import net.chunkful.inventoryrestore.storage.nitrite.NitriteStorage;
 import net.chunkful.inventoryrestore.storage.Storage;
+import net.chunkful.inventoryrestore.storage.sql.SQLStorage;
 import org.bukkit.plugin.Plugin;
 
 import java.util.function.BiFunction;
@@ -11,7 +12,8 @@ import java.util.function.BiFunction;
 public enum StorageType {
     IN_MEMORY((_, _) -> new InMemoryStorage()),
     NITRITE((_, plugin) -> new NitriteStorage(plugin)),
-    MONGODB((pluginConfiguration, plugin) -> new MongoDbStorage(pluginConfiguration.connectionString(), pluginConfiguration.databaseName()));
+    MONGODB((pluginConfiguration, _) -> new MongoDbStorage(pluginConfiguration.connectionString(), pluginConfiguration.databaseName())),
+    SQL((pluginConfiguration, _) -> new SQLStorage(pluginConfiguration.connectionString()));
 
     private final BiFunction<PluginConfiguration, Plugin, Storage> storageFactory;
 

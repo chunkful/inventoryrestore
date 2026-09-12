@@ -1,3 +1,4 @@
+import org.jooq.meta.jaxb.JSONConverterImplementation
 import xyz.jpenilla.resourcefactory.paper.PaperPluginYaml
 
 plugins {
@@ -6,6 +7,7 @@ plugins {
     alias(libs.plugins.run.paper)
     alias(libs.plugins.resource.factory.paper)
     alias(libs.plugins.gremlin.gradle)
+    alias(libs.plugins.jooqCodegen)
     alias(libs.plugins.minotaur)
     alias(libs.plugins.hangar)
 }
@@ -24,6 +26,7 @@ dependencies {
     compileOnly(libs.paper.api)
     compileOnly(libs.nbtapi)
 
+    runtimeDownload(libs.adventure.nbt)
     runtimeDownload(libs.cloud)
     runtimeDownload(libs.cloud.annotations)
     runtimeDownload(libs.cloud.paper)
@@ -32,7 +35,17 @@ dependencies {
     runtimeDownload(libs.nitrite)
     runtimeDownload(libs.nitrite.mvstore)
     runtimeDownload(libs.mongodb)
-    runtimeDownload(libs.adventure.nbt)
+    runtimeDownload(libs.jooq)
+    runtimeDownload(libs.jooq.jackson3Extensions)
+    runtimeDownload(libs.flyway.core)
+    runtimeDownload(libs.flyway.postgresql)
+    runtimeDownload(libs.flyway.mysql)
+    runtimeDownload(libs.hikaricp)
+    runtimeDownload(libs.postgresql)
+    runtimeDownload(libs.h2)
+    runtimeDownload(libs.mariadb)
+
+    jooqCodegen(libs.jooq.metaExtensions)
 }
 
 paperPluginYaml {
@@ -63,6 +76,61 @@ runPaper {
     }
 }
 
+jooq {
+    configuration {
+        generator {
+            database {
+                name = "org.jooq.meta.extensions.ddl.DDLDatabase"
+                properties {
+                    property {
+                        key = "scripts"
+                        value = "src/main/resources/sql-migrations/h2/*.sql"
+                    }
+                    property {
+                        key = "sort"
+                        value = "flyway"
+                    }
+                    property {
+                        key = "defaultNameCase"
+                        value = "lower"
+                    }
+                    property {
+                        key = "unqualifiedSchema"
+                        value = "public"
+                    }
+                }
+
+                forcedTypes {
+                    forcedType {
+                        userType = "net.chunkful.inventoryrestore.model.Snapshot"
+                        isJsonConverter = true
+                        jsonConverterImplementation = JSONConverterImplementation.JACKSON_3
+                        includeExpression = ".*\\.DATA"
+                    }
+                    forcedType {
+                        userType = "java.time.Instant"
+                        converter = "net.chunkful.inventoryrestore.storage.sql.InstantConverter"
+                        includeExpression = ".*\\.CREATED_AT"
+                    }
+                    forcedType {
+                        userType = "net.chunkful.inventoryrestore.model.Snapshot.Cause"
+                        includeExpression = ".*\\.CAUSE"
+                    }
+                }
+            }
+
+            generate {
+                isFluentSetters = true
+                isJavaTimeTypes = true
+            }
+
+            target {
+                packageName = "net.chunkful.inventoryrestore.storage.sql.jooq"
+            }
+        }
+    }
+}
+
 tasks {
     build {
         dependsOn(shadowJar)
@@ -76,6 +144,7 @@ tasks {
     withType<JavaCompile> {
         // Preserve parameter names in the bytecode
         options.compilerArgs.add("-parameters")
+        dependsOn(jooqCodegen)
     }
 }
 
