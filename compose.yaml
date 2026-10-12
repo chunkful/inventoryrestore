@@ -1,0 +1,14 @@
+services:
+  mariadb:
+    image: mariadb:11.8.5
+    environment:
+      - MARIADB_RANDOM_ROOT_PASSWORD=yes
+      - MARIADB_DATABASE=inventoryrestore
+      - MARIADB_USER=inventoryrestore
+      - MARIADB_PASSWORD=inventoryrestore
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb:/var/lib/mysql
+volumes:
+  mariadb: {}

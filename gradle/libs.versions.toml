@@ -9,6 +9,7 @@ nbtapi = "2.15.7"
 nitrite = "4.3.2"
 mongodb = "5.8.0"
 jooq = "3.21.7"
+jackson = "3.2.3"
 flyway = "13.4.0"
 hikaricp = "7.0.2"
 postgresql = "42.7.13"
@@ -37,6 +38,7 @@ adventure-nbt = { module = "net.kyori:adventure-nbt", version.ref = "adventure" 
 jooq = { module = "org.jooq:jooq", version.ref = "jooq" }
 jooq-metaExtensions = { module = "org.jooq:jooq-meta-extensions", version.ref = "jooq" }
 jooq-jackson3Extensions = { module = "org.jooq:jooq-jackson3-extensions", version.ref = "jooq" }
+jackson-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }

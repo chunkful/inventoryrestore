@@ -1,9 +1,6 @@
 package net.chunkful.inventoryrestore.model;
 
-import net.chunkful.inventoryrestore.storage.sql.ItemStackArrayDeserializer;
-import net.chunkful.inventoryrestore.storage.sql.ItemStackArraySerializer;
-import net.chunkful.inventoryrestore.storage.sql.LocationDeserializingConverter;
-import net.chunkful.inventoryrestore.storage.sql.LocationSerializingConverter;
+import net.chunkful.inventoryrestore.storage.sql.*;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
@@ -31,6 +28,8 @@ public record Snapshot(
         int level,
         int foodLevel,
         int experience,
+        @JsonSerialize(contentUsing = PotionEffectSerializer.class)
+        @JsonDeserialize(contentUsing = PotionEffectDeserializer.class)
         List<PotionEffect> activePotionEffects,
         @JsonSerialize(converter = LocationSerializingConverter.class)
         @JsonDeserialize(converter = LocationDeserializingConverter.class)

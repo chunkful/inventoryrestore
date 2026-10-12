@@ -36,7 +36,10 @@ dependencies {
     runtimeDownload(libs.nitrite.mvstore)
     runtimeDownload(libs.mongodb)
     runtimeDownload(libs.jooq)
-    runtimeDownload(libs.jooq.jackson3Extensions)
+    runtimeDownload(libs.jooq.jackson3Extensions) {
+        exclude(group = "tools.jackson.core")
+    }
+    runtimeDownload(libs.jackson.databind)
     runtimeDownload(libs.flyway.core)
     runtimeDownload(libs.flyway.postgresql)
     runtimeDownload(libs.flyway.mysql)
