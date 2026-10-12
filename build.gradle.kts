@@ -148,7 +148,7 @@ tasks {
     }
 }
 
-val gameVersions = listOf("1.21.11", "26.1.2", "26.2")
+val supportedVersions = listOf("1.21.11", "26.1.2", "26.2", "26.3")
 
 modrinth {
     token = System.getenv("MODRINTH_TOKEN")
@@ -156,7 +156,7 @@ modrinth {
     projectId = "chunkful-inventoryrestore"
     versionType = "release"
     uploadFile.set(tasks.shadowJar)
-    gameVersions = listOf("1.21.11", "26.1.2", "26.2")
+    gameVersions = supportedVersions
     loaders = listOf("paper", "folia")
     dependencies {
         required.project("nbtapi")
@@ -184,7 +184,7 @@ hangarPublish {
         platforms {
             paper {
                 jar = tasks.shadowJar.get().archiveFile
-                platformVersions = gameVersions
+                platformVersions = supportedVersions
                 dependencies {
                     hangar("NBTAPI")
                 }
