@@ -110,7 +110,7 @@ public class PaperService implements Service {
 
     @Override
     public void restoreSnapshot(CommandSender sender, Snapshot snapshot, boolean teleport) {
-        snapshotRestorer.restoreSnapshot(snapshot.playerUniqueId(), snapshot, teleport);
+        restoreSnapshot(sender, snapshot, snapshot.playerUniqueId(), teleport);
     }
 
     @Override
