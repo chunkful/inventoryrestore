@@ -58,6 +58,7 @@ public final class SQLStorage implements Storage, Lifecycled {
                 .dataSource(dataSource)
                 .locations("classpath:sql-migrations/common")
                 .locations("classpath:sql-migrations/" + dialect.getNameLC())
+                .table("inventoryrestore_schema_history")
                 .load()
                 .migrate();
     }
